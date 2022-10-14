@@ -143,7 +143,7 @@ def download(
 
     while True:
         try:
-            res = sess.get(url, headers=headers, stream=True, verify=verify)
+            res = sess.get(url, headers=headers, stream=True, verify=False)
         except requests.exceptions.ProxyError as e:
             print("An error has occurred using proxy:", proxy, file=sys.stderr)
             print(e, file=sys.stderr)
