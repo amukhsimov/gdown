@@ -67,7 +67,7 @@ def download(
     quiet=False,
     proxy=None,
     speed=None,
-    use_cookies=True,
+    use_cookies=False,
     verify=True,
     id=None,
     fuzzy=False,
