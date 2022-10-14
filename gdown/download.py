@@ -109,7 +109,7 @@ def download(
     if not (id is None) ^ (url is None):
         raise ValueError("Either url or id has to be specified")
     if id is not None:
-        url = "https://drive.google.com/uc?id={id}".format(id=id)
+        url = "https://drive.google.com/uc?export=download&confirm=y&id={id}".format(id=id)
 
     url_origin = url
     sess = requests.session()
@@ -133,7 +133,7 @@ def download(
 
     if fuzzy and gdrive_file_id:
         # overwrite the url with fuzzy match of a file id
-        url = "https://drive.google.com/uc?id={id}".format(id=gdrive_file_id)
+        url = "https://drive.google.com/uc?export=download&confirm=y&id={id}".format(id=gdrive_file_id)
         url_origin = url
         is_gdrive_download_link = True
 
