@@ -4,6 +4,7 @@ import json
 import os
 import os.path as osp
 import re
+import io
 import shutil
 import sys
 import tempfile
@@ -14,10 +15,38 @@ import requests
 import six
 import tqdm
 
+# ---
+from apiclient.discovery import build
+from oauth2client.service_account import ServiceAccountCredentials
+from googleapiclient.http import MediaIoBaseDownload
+
 from .parse_url import parse_url
 
 CHUNK_SIZE = 512 * 1024  # 512KB
 home = osp.expanduser("~")
+# ---
+SCOPES = ['https://www.googleapis.com/auth/drive']
+
+
+def get_credentials(service_file):
+    """Initializes an drive service object.
+    Returns:
+      An authorized drive service object.
+    """
+    return ServiceAccountCredentials.from_json_keyfile_name(service_file, SCOPES)
+
+
+def download_via_gdrive_api(file_id, output_filename, service_file):
+    # build google drive service
+    service = build('drive', 'v3', credentials=get_credentials(service_file))
+
+    request = service.files().get_media(fileId=file_id)
+    fh = io.FileIO(output_filename, mode='wb')
+
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while not done:
+        status, done = downloader.next_chunk()
 
 
 # textwrap.indent for Python2
@@ -62,16 +91,16 @@ def get_url_from_gdrive_confirmation(contents):
 
 
 def download(
-    url=None,
-    output=None,
-    quiet=False,
-    proxy=None,
-    speed=None,
-    use_cookies=False,
-    verify=True,
-    id=None,
-    fuzzy=False,
-    resume=False,
+        url=None,
+        output=None,
+        quiet=False,
+        proxy=None,
+        speed=None,
+        use_cookies=True,
+        verify=True,
+        id=None,
+        fuzzy=False,
+        resume=False,
 ):
     """Download file from URL.
 
@@ -133,12 +162,13 @@ def download(
 
     if fuzzy and gdrive_file_id:
         # overwrite the url with fuzzy match of a file id
-        url = "https://drive.google.com/uc?export=download&confirm=y&id={id}".format(id=gdrive_file_id)
+        url = "https://drive.google.com/uc?id={id}&export=download&authuser=0&confirm=t".format(id=gdrive_file_id)
         url_origin = url
         is_gdrive_download_link = True
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"  # NOQA
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+        # NOQA
     }
 
     while True:
