@@ -18,6 +18,7 @@ import tqdm
 # ---
 from apiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.credentials import Credentials
 from googleapiclient.http import MediaIoBaseDownload
 
 from .parse_url import parse_url
@@ -36,9 +37,9 @@ def get_credentials(service_file):
     return ServiceAccountCredentials.from_json_keyfile_name(service_file, SCOPES)
 
 
-def download_via_gdrive_api(file_id, output_filename, service_file):
+def download_via_gdrive_api(file_id, output_filename, api_key):
     # build google drive service
-    service = build('drive', 'v3', credentials=get_credentials(service_file))
+    service = build('drive', 'v3', developerKey=api_key)  # credentials=get_credentials(service_file))
 
     request = service.files().get_media(fileId=file_id)
     fh = io.FileIO(output_filename, mode='wb')
