@@ -42,12 +42,11 @@ def download_via_gdrive_api(file_id, output_filename, api_key):
     service = build('drive', 'v3', developerKey=api_key)  # credentials=get_credentials(service_file))
 
     request = service.files().get_media(fileId=file_id)
-    fh = io.FileIO(output_filename, mode='wb')
-
-    downloader = MediaIoBaseDownload(fh, request)
-    done = False
-    while not done:
-        status, done = downloader.next_chunk()
+    with io.FileIO(output_filename, mode='wb') as fh:
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
 
 
 # textwrap.indent for Python2
