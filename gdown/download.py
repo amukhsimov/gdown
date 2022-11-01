@@ -37,9 +37,9 @@ def get_credentials(service_file):
     return ServiceAccountCredentials.from_json_keyfile_name(service_file, SCOPES)
 
 
-def download_via_gdrive_api(file_id, output_filename, api_key):
+def download_via_gdrive_api(file_id, output_filename, service_file):
     # build google drive service
-    service = build('drive', 'v3', developerKey=api_key)  # credentials=get_credentials(service_file))
+    service = build('drive', 'v3', credentials=get_credentials(service_file))
 
     request = service.files().get_media(fileId=file_id)
     with io.FileIO(output_filename, mode='wb') as fh:
